@@ -1,0 +1,14 @@
+streamlit>=1.38.0,<1.50.0
+pandas>=2.2.0,<3.0.0
+numpy>=1.26.0,<2.2.0
+pyarrow>=14.0.0,<18.0.0   # pinned: newer builds (25.x) hit a mimalloc thread-local
+                          # heap bug on macOS that segfaults inside libarrow
+                          # when Streamlit reuses a worker thread across reruns
+plotly>=5.22.0
+scipy>=1.13.0
+openpyxl>=3.1.0        # for Excel read/write
+requests>=2.32.0        # calls the local Ollama server for the chatbot (Phase 8)
+matplotlib>=3.9.0
+# Optional — only needed if you switch the chatbot to a paid API later
+# anthropic>=0.34.0
+# python-dotenv>=1.0.0

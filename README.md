@@ -2,7 +2,7 @@
 
 Upload, preview, clean, filter, summarize, and visualize (2D + 3D) one or
 more datasets — plus discover relationships across datasets and chat with
-a local AI assistant about them.
+an AI assistant (Google Gemini) about them.
 
 ## Project structure
 
@@ -15,7 +15,7 @@ datalens/
 │   ├── viz.py                # Phase 4/5 — 2D and 3D chart builders (Plotly)
 │   ├── multi_dataset.py     # Phase 6 — side-by-side dataset comparison helpers
 │   ├── relations.py         # Phase 7 — cross-dataset relationships (shared columns, joins, correlation)
-│   └── chatbot.py           # Phase 8 — LLM-powered dataset Q&A (runs locally via Ollama)
+│   └── chatbot.py           # Phase 8 — LLM-powered dataset Q&A (Google Gemini API)
 ├── app/
 │   ├── main.py               # Streamlit entrypoint / home page
 │   ├── session_state.py     # Manages multiple loaded datasets in memory
@@ -51,21 +51,26 @@ source .venv/bin/activate      # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
-## Chatbot setup (Phase 8 — local LLM, no API key needed)
+## Chatbot setup (Phase 8 — Google Gemini API)
 
-The chatbot runs fully offline using [Ollama](https://ollama.com):
+The chatbot uses the [Google Gemini API](https://ai.google.dev/) — no local
+model server needed.
 
-```bash
-# 1. Install Ollama (if not already installed)
-#    macOS: brew install ollama, or download from ollama.com
-# 2. Pull a model (only needed once)
-ollama pull llama3.2:3b
-# 3. Make sure Ollama is running in the background (it usually auto-starts;
-#    if not: ollama serve)
-```
+1. Get an API key at <https://aistudio.google.com/app/apikey>.
+2. Copy `.env.example` to `.env` and set `GEMINI_API_KEY`:
 
-`core/chatbot.py` talks to `http://localhost:11434` — nothing to configure,
-no `.env` needed.
+   ```bash
+   cp .env.example .env
+   # then edit .env: GEMINI_API_KEY=your-key
+   ```
+
+   Alternatively, export `GEMINI_API_KEY` in your shell or put it in
+   `.streamlit/secrets.toml` (both are git-ignored).
+3. Optional: set `GEMINI_MODEL` to use a different model (default
+   `gemini-2.5-flash`).
+
+Only the schema, summary stats and a few sample rows are sent to Gemini —
+never the full dataset.
 
 ## Run
 
@@ -90,7 +95,7 @@ pytest tests/ -v
 - [x] **Phase 6** — Multi-dataset support (side-by-side view)
 - [x] **Phase 5** — 3D visualization (scatter + surface)
 - [x] **Phase 7** — Cross-dataset relationship discovery (shared columns, join key suggestions, cross-dataset correlation)
-- [ ] **Phase 8** — Chatbot UI (local LLM backend already built in `core/chatbot.py`, not yet wired into the Streamlit page)
+- [ ] **Phase 8** — Chatbot UI (Gemini-backed, in `core/chatbot.py` + `app/pages/8_Chatbot.py`)
 - [ ] **Phase 9** — Polish, auth, persistence, deployment
 
 ## Sample data

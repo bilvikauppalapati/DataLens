@@ -6,7 +6,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent))
 import pandas as pd
 import streamlit as st
 
-from core.chatbot import check_ollama_available, build_context, ask_chatbot
+from core.chatbot import check_llm_available, build_context, ask_chatbot
 from core.lookup import find_matching_rows, cross_dataset_lookup
 from core.nlq import detect_lookup_rule_based, resolve_structured_query
 from core.sql_query import answer_with_sql
@@ -29,10 +29,11 @@ if not dataset_names:
     st.info("No datasets loaded yet. Go to **Upload & Preview** first.")
     st.stop()
 
-if not check_ollama_available():
+if not check_llm_available():
     st.error(
-        "Can't reach Ollama at http://localhost:11434. Make sure it's installed and running:\n\n"
-        "```\nollama serve\n```\n\nand that you've pulled a model, e.g. `ollama pull llama3.2:3b`."
+        "No Gemini API key configured. Get one at https://aistudio.google.com/app/apikey "
+        "and set it as `GEMINI_API_KEY` in a `.env` file at the project root, your shell "
+        "environment, or `.streamlit/secrets.toml`."
     )
     st.stop()
 
@@ -152,8 +153,8 @@ if question:
             else:
                 # 3. Try a fast, deterministic (non-LLM) single-value lookup first —
                 # this is what actually fixes the "not enough information" bug: it
-                # searches the REAL data directly instead of depending on the small
-                # local model formatting JSON correctly every time.
+                # searches the REAL data directly instead of depending on the
+                # model formatting JSON correctly every time.
                 intent = detect_lookup_rule_based(question, all_dfs)
 
                 if intent and intent.get("intent") == "lookup":

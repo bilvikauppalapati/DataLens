@@ -2,7 +2,7 @@
 nlq.py — Phase 8 support module
 Rule-based ("deterministic") natural-language lookup detection.
 
-This exists because relying on a small local LLM to correctly format a
+This exists because relying on an LLM to correctly format a
 JSON description of every question is not reliable enough on its own —
 it silently fails sometimes, which then falls back to a general answer
 that can only see a few sample rows (see core.chatbot.detect_lookup_intent).

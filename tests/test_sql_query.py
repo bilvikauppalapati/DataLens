@@ -71,7 +71,7 @@ def test_clean_sql_response_strips_trailing_semicolon():
 
 
 def test_clean_sql_response_fixes_redundant_backtick_around_quoted_ident():
-    """Regression test for a real failure seen with the local model: it
+    """Regression test for a real failure seen with an earlier model: it
     wrapped an already double-quoted table name in backticks too
     (`` `"cars.csv"` ``), which SQLite parses as a table literally named
     `"cars.csv"` (quote characters included) — a table that doesn't exist

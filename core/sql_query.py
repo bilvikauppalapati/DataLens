@@ -1,6 +1,6 @@
 """
 sql_query.py — Phase 8 extension
-Text-to-SQL: ask the local LLM to translate a natural-language question
+Text-to-SQL: ask the LLM (Google Gemini) to translate a natural-language question
 into a real SQL SELECT statement, then run that statement against the
 ACTUAL data (an in-memory SQLite database built fresh from the dataframe)
 and return the real result — no guessing, no 5-row sample.
@@ -26,9 +26,7 @@ import re
 import sqlite3
 
 import pandas as pd
-import requests
-
-from core.chatbot import OLLAMA_URL, MODEL_NAME
+from core.chatbot import call_llm
 
 
 SQL_SYSTEM_PROMPT = (
@@ -60,7 +58,7 @@ def build_table_aliases(datasets: dict[str, pd.DataFrame]) -> dict[str, str]:
     digits, underscores only, extension stripped) to use as the actual
     SQLite table name. A real filename like "cars.csv" contains a dot,
     which SQLite's parser treats as a schema.table separator unless the
-    whole identifier is quoted — and small local models are unreliable
+    whole identifier is quoted — and models are unreliable
     about remembering to quote it (or keep the extension at all), so
     tables are aliased to names that never need quoting, sidestepping the
     whole class of "no such table" failures instead of trying to police
@@ -129,7 +127,7 @@ def clean_sql_response(raw_text: str) -> str:
 
 def _normalize_sql_quoting(sql: str) -> str:
     """
-    Small local models occasionally mix SQL quoting dialects and wrap an
+    Models occasionally mix SQL quoting dialects and wrap an
     already double-quoted identifier in backticks too — e.g.
     `` `"cars.csv"` `` — which SQLite parses as a table literally named
     `"cars.csv"` (quote characters included), not the real table `cars.csv`,
@@ -145,7 +143,7 @@ def generate_sql(
     question: str, datasets: dict[str, pd.DataFrame], aliases: dict[str, str] | None = None
 ) -> str | None:
     """
-    Asks the local LLM to translate the question into SQL over one or more
+    Asks the LLM to translate the question into SQL over one or more
     tables (referred to by their SQL-safe aliases — see
     build_table_aliases). Returns the raw SQL string, or None if the
     model declined ("NONE"), errored, or produced something that fails
@@ -159,16 +157,10 @@ def generate_sql(
         {"role": "user", "content": prompt},
     ]
     try:
-        response = requests.post(
-            OLLAMA_URL,
-            json={"model": MODEL_NAME, "messages": messages, "stream": False},
-            timeout=60,
-        )
-        response.raise_for_status()
-    except requests.exceptions.RequestException:
+        raw = call_llm(messages, timeout=60)
+    except (ConnectionError, RuntimeError):
         return None
 
-    raw = response.json().get("message", {}).get("content", "")
     sql = clean_sql_response(raw)
 
     if not sql or sql.upper() == "NONE":

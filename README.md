@@ -67,7 +67,7 @@ model server needed.
    Alternatively, export `GEMINI_API_KEY` in your shell or put it in
    `.streamlit/secrets.toml` (both are git-ignored).
 3. Optional: set `GEMINI_MODEL` to use a different model (default
-   `gemini-2.5-flash`).
+   `gemini-3.5-flash`).
 
 Only the schema, summary stats and a few sample rows are sent to Gemini —
 never the full dataset.

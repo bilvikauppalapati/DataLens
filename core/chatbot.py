@@ -26,7 +26,7 @@ from pathlib import Path
 import requests
 
 GEMINI_API_BASE = "https://generativelanguage.googleapis.com/v1beta/models"
-DEFAULT_MODEL = "gemini-2.5-flash"
+DEFAULT_MODEL = "gemini-3.5-flash"
 
 
 def _load_dotenv() -> None:
